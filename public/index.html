@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resume → Job Search Terms</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Resume → Job Search Terms</h1>
+    <p class="subtitle">Paste your resume text or upload a file. Get back tailored search terms for LinkedIn, Indeed, and Google.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="paste">Paste text</button>
+      <button class="tab-btn" data-tab="upload">Upload file</button>
+    </div>
+
+    <div id="paste-panel" class="panel active">
+      <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
+    </div>
+
+    <div id="upload-panel" class="panel">
+      <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" />
+      <p class="hint">Supported: .pdf, .docx, .txt</p>
+    </div>
+
+    <button id="analyzeBtn">Generate search terms</button>
+    <div id="status"></div>
+
+    <div id="results" class="results hidden">
+      <h2>Profile summary</h2>
+      <p id="summary"></p>
+
+      <h2>Primary job titles to search</h2>
+      <ul id="primaryTitles" class="chip-list"></ul>
+
+      <h2>Adjacent / pivot titles worth trying</h2>
+      <ul id="adjacentTitles" class="chip-list"></ul>
+
+      <h2>Skill keywords</h2>
+      <ul id="skillKeywords" class="chip-list"></ul>
+
+      <h2>LinkedIn boolean searches</h2>
+      <ul id="linkedinSearches" class="copy-list"></ul>
+
+      <h2>Google X-ray searches</h2>
+      <ul id="googleSearches" class="copy-list"></ul>
+
+      <h2>Notes</h2>
+      <p id="notes"></p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

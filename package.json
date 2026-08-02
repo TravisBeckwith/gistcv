@@ -1,0 +1,38 @@
+{
+  "name": "gistcv",
+  "version": "1.0.0",
+  "description": "Turn a resume into tailored job search terms for LinkedIn, Indeed, and Google.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "resume",
+    "cv",
+    "job-search",
+    "linkedin",
+    "career",
+    "search-terms"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TravisBeckwith/gistcv.git"
+  },
+  "homepage": "https://github.com/TravisBeckwith/gistcv#readme",
+  "bugs": {
+    "url": "https://github.com/TravisBeckwith/gistcv/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mammoth": "^1.7.2",
+    "multer": "^2.0.0",
+    "pdf-parse": "^1.1.1"
+  }
+}

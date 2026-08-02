@@ -1,0 +1,101 @@
+:root {
+  --accent: #d97757;
+  --bg: #faf9f5;
+  --text: #2d2d2a;
+  --border: #e0ddd3;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+h1 { font-size: 1.8rem; margin-bottom: 4px; }
+.subtitle { color: #6b6a63; margin-top: 0; margin-bottom: 24px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+textarea {
+  width: 100%;
+  height: 260px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+input[type="file"] {
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  width: 100%;
+  background: white;
+}
+
+.hint { color: #8a887f; font-size: 0.85rem; }
+
+#analyzeBtn {
+  margin-top: 16px;
+  padding: 12px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+#analyzeBtn:disabled { opacity: 0.6; cursor: default; }
+
+#status { margin-top: 12px; font-size: 0.9rem; color: #b03a2e; }
+
+.results { margin-top: 32px; }
+.results.hidden { display: none; }
+.results h2 { font-size: 1.05rem; margin-bottom: 8px; margin-top: 24px; }
+
+.chip-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-list li {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.copy-list { list-style: none; padding: 0; }
+.copy-list li {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+  word-break: break-word;
+}
+.copy-list li:hover { border-color: var(--accent); }
+.copy-list li::after { content: " 📋"; opacity: 0.5; }
