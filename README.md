@@ -1,4 +1,4 @@
-# gistcv
+# gistcv [![DOI](https://zenodo.org/badge/1320727809.svg)](https://doi.org/10.5281/zenodo.21763847)
 
 **Get the gist of a resume — as search terms.**
 
