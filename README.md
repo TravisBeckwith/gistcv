@@ -14,7 +14,19 @@ No scraping involved — this only reads the resume you provide and uses an
 LLM to reason about search terms. You then paste the generated terms into
 LinkedIn, Indeed, Google, etc. yourself.
 
-## Setup
+## Two ways to run this
+
+**Option 1 — No install, just a webpage.** Open `web/index.html` in any
+browser (locally, or via GitHub Pages if enabled on this repo — see
+[web/README](./web/README.md)), paste in your own free Gemini API key,
+and go. No Node, no npm, no terminal. Best for anyone who isn't a
+developer.
+
+**Option 2 — Local Node server.** The instructions below. Better if you
+want to swap LLM providers via `.env`, extend the backend, or don't want
+to deal with per-visitor API keys.
+
+## Setup (Node server)
 
 1. Install dependencies:
    ```bash

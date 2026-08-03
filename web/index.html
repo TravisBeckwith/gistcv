@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>gistcv — resume to search terms</title>
+<meta name="description" content="Paste or upload a resume and get tailored job search terms for LinkedIn, Indeed, and Google. Runs entirely in your browser." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EEF1F5;
+    --card: #FFFFFF;
+    --ink: #20242C;
+    --ink-soft: #565E6D;
+    --line: #D7DCE3;
+    --marker-yellow: #FFCC33;
+    --marker-yellow-ink: #4A3B00;
+    --marker-coral: #FF6F59;
+    --marker-coral-ink: #5C1F14;
+    --marker-teal: #2CB1A3;
+    --marker-teal-ink: #063F39;
+    --danger: #C0392B;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    padding: 48px 20px 80px;
+  }
+
+  .wrap { max-width: 700px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 2.1rem;
+    margin: 0 0 8px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  h1 .mark {
+    background: linear-gradient(105deg, transparent 0%, transparent 4%, var(--marker-yellow) 4%, var(--marker-yellow) 96%, transparent 96%);
+    padding: 0 2px;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 54ch;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 0 rgba(32,36,44,0.03);
+  }
+
+  .card h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card h2 .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* --- API key card --- */
+  .key-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  input[type="password"], input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  input:focus, textarea:focus, button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+
+  .btn-ghost {
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 8px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  .key-hint {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: 10px 0 0;
+    line-height: 1.5;
+  }
+  .key-hint a { color: var(--ink); }
+
+  .key-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    margin-top: 10px;
+    color: var(--ink-soft);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+  .dot.on { background: var(--marker-teal); }
+
+  /* --- Tabs --- */
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .tab-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  textarea {
+    width: 100%;
+    height: 220px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    resize: vertical;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .drop {
+    border: 2px dashed var(--line);
+    border-radius: 8px;
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    cursor: pointer;
+    background: var(--paper);
+  }
+  .drop.drag { border-color: var(--marker-teal); color: var(--ink); }
+  .drop input { display: none; }
+  .file-name { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; margin-top: 8px; color: var(--ink); }
+
+  .generate-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .generate-btn:disabled { opacity: 0.5; cursor: default; }
+  .generate-btn:not(:disabled):hover { background: #383F4E; }
+
+  #status {
+    margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--danger);
+    line-height: 1.5;
+  }
+  #status.ok { color: var(--marker-teal-ink); }
+
+  /* --- Results --- */
+  #results { display: none; }
+  #results.show { display: block; }
+
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .chip-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 8px; }
+  .chip {
+    position: relative;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 3px 4px;
+  }
+  .chip::before {
+    content: "";
+    position: absolute;
+    left: -2px; right: -2px; bottom: 2px; top: 40%;
+    z-index: 0;
+    border-radius: 3px;
+    transform: rotate(-0.6deg);
+  }
+  .chip span { position: relative; z-index: 1; }
+  .chip.yellow::before { background: var(--marker-yellow); }
+  .chip.coral::before { background: var(--marker-coral); opacity: 0.85; }
+  .chip.teal::before { background: var(--marker-teal); opacity: 0.8; }
+  .chip.coral span, .chip.teal span { color: #14181F; }
+
+  .card-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .card-list li {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    word-break: break-word;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-list li:hover { border-color: var(--ink); }
+  .card-list li .copy-tag {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .card-list li.copied { border-color: var(--marker-teal); border-style: solid; }
+  .card-list li.copied .copy-tag { color: var(--marker-teal-ink); }
+
+  .notes {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  footer {
+    max-width: 700px;
+    margin: 40px auto 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.6;
+  }
+  footer a { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">gistcv — v0.1 (testing)</p>
+    <h1>Get the <span class="mark">gist</span> of your resume,<br>as search terms.</h1>
+    <p class="lede">Paste or upload a resume. Get back job titles, skill keywords, and ready-to-copy search strings for LinkedIn, Indeed, and Google — all generated right here in your browser.</p>
+  </header>
+
+  <div class="card">
+    <h2><span class="num">1</span> Add your free Gemini API key</h2>
+    <div class="key-row">
+      <input type="password" id="apiKey" placeholder="AIzaSy..." autocomplete="off" />
+      <button class="btn-ghost" id="toggleKeyVis">Show</button>
+      <button class="btn-ghost" id="saveKey">Save key</button>
+    </div>
+    <p class="key-hint">
+      Get a free key (no credit card) at
+      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.
+      It's saved only in this browser's local storage and sent directly to Google — never to any other server.
+    </p>
+    <div class="key-status"><span class="dot" id="keyDot"></span><span id="keyStatusText">No key saved yet</span></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span> Add your resume</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="paste">Paste text</button>
+      <button class="tab-btn" data-tab="upload">Upload file</button>
+    </div>
+
+    <div id="paste-panel" class="panel active">
+      <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
+    </div>
+
+    <div id="upload-panel" class="panel">
+      <label class="drop" id="dropZone">
+        <span id="dropLabel">Drop a .pdf, .docx, or .txt file here, or click to choose</span>
+        <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" />
+      </label>
+      <div class="file-name" id="fileName"></div>
+    </div>
+
+    <button class="generate-btn" id="generateBtn">Generate search terms</button>
+    <div id="status"></div>
+  </div>
+
+  <div id="results">
+    <div class="summary-card" id="summary"></div>
+
+    <div class="card">
+      <h2><span class="num">A</span> Primary job titles</h2>
+      <ul class="chip-list yellow-list" id="primaryTitles"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">B</span> Adjacent / pivot titles</h2>
+      <ul class="chip-list" id="adjacentTitles"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">C</span> Skill keywords</h2>
+      <ul class="chip-list" id="skillKeywords"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">D</span> LinkedIn boolean searches</h2>
+      <ul class="card-list" id="linkedinSearches"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">E</span> Google X-ray searches</h2>
+      <ul class="card-list" id="googleSearches"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">F</span> Notes</h2>
+      <p class="notes" id="notes"></p>
+    </div>
+  </div>
+
+  <footer>
+    Runs entirely in your browser. Nothing is uploaded to any server but Google's Gemini API.<br>
+    <a href="https://github.com/TravisBeckwith/gistcv" target="_blank" rel="noopener">github.com/TravisBeckwith/gistcv</a>
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+  }
+
+  const STORAGE_KEY = 'gistcv_gemini_api_key';
+  const GEMINI_MODEL = 'gemini-3.6-flash';
+
+  const apiKeyInput = document.getElementById('apiKey');
+  const toggleKeyVis = document.getElementById('toggleKeyVis');
+  const saveKeyBtn = document.getElementById('saveKey');
+  const keyDot = document.getElementById('keyDot');
+  const keyStatusText = document.getElementById('keyStatusText');
+
+  function loadKey() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      apiKeyInput.value = saved;
+      keyDot.classList.add('on');
+      keyStatusText.textContent = 'Key saved in this browser';
+    }
+  }
+  loadKey();
+
+  toggleKeyVis.addEventListener('click', () => {
+    const isPassword = apiKeyInput.type === 'password';
+    apiKeyInput.type = isPassword ? 'text' : 'password';
+    toggleKeyVis.textContent = isPassword ? 'Hide' : 'Show';
+  });
+
+  saveKeyBtn.addEventListener('click', () => {
+    const val = apiKeyInput.value.trim();
+    if (!val) {
+      keyDot.classList.remove('on');
+      keyStatusText.textContent = 'No key saved yet';
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, val);
+    keyDot.classList.add('on');
+    keyStatusText.textContent = 'Key saved in this browser';
+  });
+
+  // --- Tabs ---
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+  let activeTab = 'paste';
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach((b) => b.classList.remove('active'));
+      panels.forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.dataset.tab;
+      document.getElementById(`${activeTab}-panel`).classList.add('active');
+    });
+  });
+
+  // --- File handling ---
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('resumeFile');
+  const dropLabel = document.getElementById('dropLabel');
+  const fileNameEl = document.getElementById('fileName');
+  let selectedFile = null;
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) {
+      selectedFile = fileInput.files[0];
+      fileNameEl.textContent = selectedFile.name;
+    }
+  });
+
+  ['dragover', 'dragleave', 'drop'].forEach((evt) => {
+    dropZone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      if (evt === 'dragover') dropZone.classList.add('drag');
+      if (evt === 'dragleave') dropZone.classList.remove('drag');
+      if (evt === 'drop') {
+        dropZone.classList.remove('drag');
+        if (e.dataTransfer.files.length) {
+          selectedFile = e.dataTransfer.files[0];
+          fileNameEl.textContent = selectedFile.name;
+        }
+      }
+    });
+  });
+
+  async function extractTextFromFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'txt') {
+      return await file.text();
+    }
+
+    if (ext === 'pdf') {
+      if (!window.pdfjsLib) throw new Error('PDF support failed to load (blocked script?). Try pasting the resume text instead, or reload the page.');
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map((it) => it.str).join(' ') + '\n';
+      }
+      return text;
+    }
+
+    if (ext === 'docx') {
+      if (!window.mammoth) throw new Error('DOCX support failed to load (blocked script?). Try pasting the resume text instead, or reload the page.');
+      const buf = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: buf });
+      return result.value;
+    }
+
+    throw new Error(`Unsupported file type: .${ext}. Please use .pdf, .docx, or .txt.`);
+  }
+
+  // --- Prompt + Gemini call ---
+  function buildPrompt(resumeText) {
+    return `You are a career search strategist. Below is a candidate's resume text (raw extracted text, formatting may be imperfect).
+
+Your job: generate a set of practical job search terms this person can paste directly into LinkedIn, Indeed, or Google job search.
+
+Think about:
+- Their actual seniority level and years of experience
+- Skills, tools, and technologies mentioned
+- Industries/domains they've worked in
+- The fact that companies use wildly different job titles for the same role - include title variants, not just what's literally on the resume
+- Adjacent or pivot roles that are a realistic stretch given their background
+
+Return ONLY valid JSON (no markdown fences, no preamble) matching this exact shape:
+
+{
+  "summary": "one or two sentence read on their profile/level",
+  "primary_titles": ["string", "..."],
+  "adjacent_titles": ["string", "..."],
+  "skill_keywords": ["string", "..."],
+  "linkedin_boolean_searches": ["string", "..."],
+  "google_xray_searches": ["string", "..."],
+  "notes": "any caveats or suggestions, e.g. if the resume is thin on certain signals"
+}
+
+Resume text:
+"""
+${resumeText}
+"""`;
+  }
+
+  function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  async function callGemini(resumeText, apiKey) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    const RETRYABLE = new Set([429, 503]);
+    let lastErr;
+
+    for (let attempt = 0; attempt <= 3; attempt++) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: buildPrompt(resumeText) }] }],
+          generationConfig: { responseMimeType: 'application/json' },
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error('No text response from Gemini.');
+        return JSON.parse(text.replace(/```json|```/g, '').trim());
+      }
+
+      const errBody = await response.text();
+      lastErr = new Error(`Gemini API error (${response.status}): ${errBody}`);
+      if (!RETRYABLE.has(response.status) || attempt === 3) throw lastErr;
+      await sleep(1000 * 2 ** attempt);
+    }
+    throw lastErr;
+  }
+
+  // --- UI wiring ---
+  const statusEl = document.getElementById('status');
+  const generateBtn = document.getElementById('generateBtn');
+  const resultsEl = document.getElementById('results');
+
+  function setStatus(msg, ok = false) {
+    statusEl.textContent = msg;
+    statusEl.className = ok ? 'ok' : '';
+  }
+
+  function renderChips(elId, items, colorClass) {
+    const el = document.getElementById(elId);
+    el.innerHTML = '';
+    (items || []).forEach((item) => {
+      const li = document.createElement('li');
+      li.className = `chip ${colorClass}`;
+      li.innerHTML = `<span></span>`;
+      li.querySelector('span').textContent = item;
+      el.appendChild(li);
+    });
+  }
+
+  function renderCopyList(elId, items) {
+    const el = document.getElementById(elId);
+    el.innerHTML = '';
+    (items || []).forEach((item) => {
+      const li = document.createElement('li');
+      const textSpan = document.createElement('span');
+      textSpan.textContent = item;
+      const tag = document.createElement('span');
+      tag.className = 'copy-tag';
+      tag.textContent = 'copy';
+      li.appendChild(textSpan);
+      li.appendChild(tag);
+      li.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(item);
+        li.classList.add('copied');
+        tag.textContent = 'copied ✓';
+        setTimeout(() => { li.classList.remove('copied'); tag.textContent = 'copy'; }, 1200);
+      });
+      el.appendChild(li);
+    });
+  }
+
+  function renderResults(data) {
+    document.getElementById('summary').textContent = data.summary || '';
+    document.getElementById('notes').textContent = data.notes || '';
+    renderChips('primaryTitles', data.primary_titles, 'yellow');
+    renderChips('adjacentTitles', data.adjacent_titles, 'coral');
+    renderChips('skillKeywords', data.skill_keywords, 'teal');
+    renderCopyList('linkedinSearches', data.linkedin_boolean_searches);
+    renderCopyList('googleSearches', data.google_xray_searches);
+    resultsEl.classList.add('show');
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  generateBtn.addEventListener('click', async () => {
+    setStatus('');
+    resultsEl.classList.remove('show');
+
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      setStatus('Add and save your Gemini API key above first.');
+      return;
+    }
+
+    let resumeText = '';
+    try {
+      if (activeTab === 'paste') {
+        resumeText = document.getElementById('resumeText').value.trim();
+      } else {
+        if (!selectedFile) {
+          setStatus('Choose a file first.');
+          return;
+        }
+        setStatus('Reading file...');
+        resumeText = (await extractTextFromFile(selectedFile)).trim();
+      }
+    } catch (err) {
+      setStatus(err.message);
+      return;
+    }
+
+    if (resumeText.length < 50) {
+      setStatus('Please provide more resume text (at least a few sentences).');
+      return;
+    }
+
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Generating...';
+    setStatus('Contacting Gemini...');
+
+    try {
+      const data = await callGemini(resumeText, apiKey);
+      setStatus('Done.', true);
+      renderResults(data);
+    } catch (err) {
+      setStatus(err.message);
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.textContent = 'Generate search terms';
+    }
+  });
+</script>
+</body>
+</html>

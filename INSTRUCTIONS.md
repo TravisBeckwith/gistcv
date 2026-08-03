@@ -5,6 +5,24 @@ locally and (optionally) publishing it on GitHub.
 
 ---
 
+## 0. Don't want to install anything?
+
+If you'd rather skip Node, npm, and the terminal entirely, use the
+**web version** instead:
+
+1. Open the `web/index.html` file directly in your browser (double-click
+   it), or visit the hosted link if one was shared with you.
+2. Get a free API key at https://aistudio.google.com/apikey and paste it
+   into the page.
+3. Paste or upload your resume and click **Generate search terms**.
+
+That's the entire setup — no further steps in this manual apply. The
+rest of this document covers the Node-based version, which offers more
+flexibility (multiple LLM providers, editable backend) at the cost of a
+proper install.
+
+---
+
 ## 1. Prerequisites
 
 Before you start, make sure you have:
