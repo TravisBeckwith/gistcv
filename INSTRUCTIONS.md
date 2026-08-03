@@ -134,52 +134,6 @@ Leave this terminal window open — closing it stops the server.
 
 To stop the server, go back to the terminal and press `Ctrl+C`.
 
----
-
-## 7. Making changes (optional)
-
-- Backend logic lives in `server.js`.
-- Frontend files live in `public/` (`index.html`, `style.css`, `app.js`).
-- After editing `server.js`, restart with `npm start`, or run
-  `npm run dev` instead, which auto-restarts on file changes.
-
----
-
-## 8. Publishing to GitHub (optional)
-
-1. Create a new, empty repository on GitHub named `gistcv` (don't
-   initialize it with a README — you already have one).
-2. In `package.json` and `LICENSE`, replace the `<your-username>` and
-   `<your-name>` placeholders with your actual GitHub username and name.
-3. From inside the `gistcv` folder:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: gistcv"
-   git branch -M main
-   git remote add origin https://github.com/TravisBeckwith/gistcv.git
-   git push -u origin main
-   ```
-4. Refresh your GitHub repo page — your code should now be there.
-
----
-
-## 9. Cutting a release (optional)
-
-1. Tag the current commit:
-   ```bash
-   git tag -a v1.0.0 -m "v1.0.0"
-   git push origin v1.0.0
-   ```
-2. On GitHub, go to your repo → **Releases** (right sidebar) →
-   **Draft a new release**.
-3. Under **Choose a tag**, select `v1.0.0`.
-4. Add a title (e.g. `v1.0.0`) and paste in release notes describing
-   what's included.
-5. Click **Publish release**.
-
----
-
 ## Troubleshooting
 
 | Problem | Likely cause / fix |
