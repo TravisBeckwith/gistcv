@@ -34,7 +34,7 @@ If you have the `gistcv.zip` file:
 
 If you already pushed it to GitHub instead, clone it:
 ```bash
-git clone https://github.com/<your-username>/gistcv.git
+git clone https://github.com/TravisBeckwith/gistcv.git
 cd gistcv
 ```
 
@@ -157,7 +157,7 @@ To stop the server, go back to the terminal and press `Ctrl+C`.
    git add .
    git commit -m "Initial commit: gistcv"
    git branch -M main
-   git remote add origin https://github.com/<your-username>/gistcv.git
+   git remote add origin https://github.com/TravisBeckwith/gistcv.git
    git push -u origin main
    ```
 4. Refresh your GitHub repo page — your code should now be there.
