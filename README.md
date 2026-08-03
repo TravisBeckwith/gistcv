@@ -2,6 +2,10 @@
 
 **Get the gist of a resume — as search terms.**
 
+> **Status: v0.1 — testing.** This is an early, actively-tested release.
+> Expect rough edges, and pin dependency/model versions if you rely on
+> stable behavior.
+
 Paste or upload a resume (PDF, DOCX, or plain text) and get back tailored,
 platform-ready job search terms: primary job titles, adjacent/pivot titles,
 skill keywords, LinkedIn boolean search strings, and Google X-ray searches.
@@ -111,28 +115,3 @@ Issues and PRs welcome. Keep new LLM providers behind the same
 ## License
 
 MIT — see [LICENSE](./LICENSE).
-
-## Pushing to GitHub and cutting a release
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: gistcv"
-git branch -M main
-git remote add origin https://github.com/<your-username>/gistcv.git
-git push -u origin main
-```
-
-Then tag and publish a release:
-
-```bash
-git tag -a v1.0.0 -m "v1.0.0"
-git push origin v1.0.0
-```
-
-On GitHub: **Releases → Draft a new release → choose tag `v1.0.0`** →
-add release notes → **Publish release**.
-
-Before pushing, replace the `<your-username>` placeholders in
-`package.json` (`repository`, `homepage`, `bugs`) and `LICENSE`
-(`<your-name>`) with your actual details.
