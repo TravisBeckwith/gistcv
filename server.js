@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, "public")));
 const LLM_PROVIDER = (process.env.LLM_PROVIDER || "gemini").toLowerCase(); // "gemini" | "groq" | "anthropic"
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -83,6 +83,41 @@ function parseJsonFromText(text) {
   return JSON.parse(cleaned);
 }
 
+// Retries a fetch call on transient errors (503 overloaded, 429 rate limited)
+// with exponential backoff. Other errors (bad key, bad request, etc.) fail immediately.
+const RETRYABLE_STATUS_CODES = new Set([429, 503]);
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url, options, providerName) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const response = await fetch(url, options);
+
+    if (response.ok) return response;
+
+    const errText = await response.text();
+    lastError = new Error(`${providerName} API error (${response.status}): ${errText}`);
+
+    const isRetryable = RETRYABLE_STATUS_CODES.has(response.status);
+    const isLastAttempt = attempt === MAX_RETRIES;
+    if (!isRetryable || isLastAttempt) throw lastError;
+
+    const delay = BASE_DELAY_MS * 2 ** attempt; // 1s, 2s, 4s
+    console.warn(
+      `${providerName} returned ${response.status} (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${delay}ms...`
+    );
+    await sleep(delay);
+  }
+
+  throw lastError;
+}
+
 // --- Free tier: Google Gemini API (no credit card required, ~1500 req/day on Flash) ---
 async function callGemini(resumeText) {
   if (!GEMINI_API_KEY) {
@@ -93,19 +128,18 @@ async function callGemini(resumeText) {
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(resumeText) }] }],
-      generationConfig: { responseMimeType: "application/json" },
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errText}`);
-  }
+  const response = await fetchWithRetry(
+    url,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: buildPrompt(resumeText) }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+    },
+    "Gemini"
+  );
 
   const data = await response.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -121,23 +155,22 @@ async function callGroq(resumeText) {
     );
   }
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
+  const response = await fetchWithRetry(
+    "https://api.groq.com/openai/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role: "user", content: buildPrompt(resumeText) }],
+        response_format: { type: "json_object" },
+      }),
     },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [{ role: "user", content: buildPrompt(resumeText) }],
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Groq API error (${response.status}): ${errText}`);
-  }
+    "Groq"
+  );
 
   const data = await response.json();
   const text = data.choices?.[0]?.message?.content;
@@ -151,24 +184,23 @@ async function callAnthropic(resumeText) {
     throw new Error("Missing ANTHROPIC_API_KEY. Set it in your .env file (see .env.example).");
   }
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
+  const response = await fetchWithRetry(
+    "https://api.anthropic.com/v1/messages",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: ANTHROPIC_MODEL,
+        max_tokens: 1500,
+        messages: [{ role: "user", content: buildPrompt(resumeText) }],
+      }),
     },
-    body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
-      max_tokens: 1500,
-      messages: [{ role: "user", content: buildPrompt(resumeText) }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Anthropic API error (${response.status}): ${errText}`);
-  }
+    "Anthropic"
+  );
 
   const data = await response.json();
   const textBlock = data.content?.find((b) => b.type === "text");
