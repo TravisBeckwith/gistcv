@@ -34,7 +34,7 @@ If you have the `gistcv.zip` file:
 
 If you already pushed it to GitHub instead, clone it:
 ```bash
-git clone https://github.com/TravisBeckwith/gistcv.git
+git clone https://github.com/<your-username>/gistcv.git
 cd gistcv
 ```
 
@@ -98,6 +98,13 @@ provider `LLM_PROVIDER` is set to.
 Save the `.env` file when done. **Never commit this file or share it** —
 it's already listed in `.gitignore` so Git will ignore it automatically.
 
+> **Heads up:** free-tier providers (especially Google) rename or retire
+> model IDs fairly often. If you get a `404 ... no longer available`
+> error later, it just means the model name in `.env` is outdated —
+> check the provider's current model list and update `GEMINI_MODEL` (or
+> `GROQ_MODEL` / `ANTHROPIC_MODEL`) accordingly. See the Troubleshooting
+> section at the bottom of this doc.
+
 ---
 
 ## 5. Start the app
@@ -134,11 +141,62 @@ Leave this terminal window open — closing it stops the server.
 
 To stop the server, go back to the terminal and press `Ctrl+C`.
 
+---
+
+## 7. Making changes (optional)
+
+- Backend logic lives in `server.js`.
+- Frontend files live in `public/` (`index.html`, `style.css`, `app.js`).
+- After editing `server.js`, restart with `npm start`, or run
+  `npm run dev` instead, which auto-restarts on file changes.
+
+---
+
+## 8. Publishing to GitHub (optional)
+
+1. Create a new, empty repository on GitHub named `gistcv` (don't
+   initialize it with a README — you already have one).
+2. In `package.json` and `LICENSE`, replace the `<your-username>` and
+   `<your-name>` placeholders with your actual GitHub username and name.
+3. From inside the `gistcv` folder:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit: gistcv"
+   git branch -M main
+   git remote add origin https://github.com/<your-username>/gistcv.git
+   git push -u origin main
+   ```
+4. Refresh your GitHub repo page — your code should now be there.
+
+---
+
+## 9. Cutting a release (optional)
+
+1. Tag the current commit:
+   ```bash
+   git tag -a v1.0.0 -m "v1.0.0"
+   git push origin v1.0.0
+   ```
+2. On GitHub, go to your repo → **Releases** (right sidebar) →
+   **Draft a new release**.
+3. Under **Choose a tag**, select `v1.0.0`.
+4. Add a title (e.g. `v1.0.0`) and paste in release notes describing
+   what's included.
+5. Click **Publish release**.
+
+---
+
 ## Troubleshooting
 
 | Problem | Likely cause / fix |
 |---|---|
-| `Missing GEMINI_API_KEY` error | You haven't set the matching key in `.env` for whatever `LLM_PROVIDER` is set to |
+| `no such file or directory, open '.../package.json'` | You ran `npm install` outside the project folder. `cd` into `gistcv/` first. |
+| `.env.example: No such file or directory` | Some GUI unzip tools drop dotfiles. Re-extract with `unzip` from a terminal, or recreate `.env.example` manually (see README). |
+| `API key not valid. Please pass a valid API key.` | `.env` still has the placeholder text instead of a real key, or the key wasn't saved before starting the server. Edit `.env`, paste your real key with no quotes/spaces, then **restart** with `npm start` — env vars are only read at startup. |
+| `This model ... is no longer available` (HTTP 404) | The provider retired the model ID in use. Providers rename/retire models often (especially Google). Check the provider's current model list and set the new ID via env var, e.g. `GEMINI_MODEL=gemini-3.6-flash` in `.env` — no code changes needed. |
+| `currently experiencing high demand` / `UNAVAILABLE` (HTTP 503) | The provider's servers are temporarily overloaded — not a problem with your setup. The app auto-retries 3 times with backoff before failing. If it still fails, wait a few minutes and try again, or switch `LLM_PROVIDER` to another configured provider in `.env`. |
+| Rate limited (HTTP 429) | You've hit the free tier's daily/per-minute request cap. Also auto-retried a few times; if it persists, wait for the quota to reset or switch providers. |
 | `Cannot find package 'express'` | Run `npm install` before `npm start` |
 | Port 3000 already in use | Another app is using that port — set `PORT=3001` (or any free port) in `.env` |
 | File upload fails silently | Only `.pdf`, `.docx`, and `.txt` are supported, and files must be under 8MB |
