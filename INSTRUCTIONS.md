@@ -173,17 +173,21 @@ To stop the server, go back to the terminal and press `Ctrl+C`.
 
 ## 9. Cutting a release (optional)
 
+This is currently a **v0.1 testing release** — mark it as a pre-release
+on GitHub so it's clear it's not yet stable.
+
 1. Tag the current commit:
    ```bash
-   git tag -a v1.0.0 -m "v1.0.0"
-   git push origin v1.0.0
+   git tag -a v0.1.0 -m "v0.1.0 - testing"
+   git push origin v0.1.0
    ```
 2. On GitHub, go to your repo → **Releases** (right sidebar) →
    **Draft a new release**.
-3. Under **Choose a tag**, select `v1.0.0`.
-4. Add a title (e.g. `v1.0.0`) and paste in release notes describing
-   what's included.
-5. Click **Publish release**.
+3. Under **Choose a tag**, select `v0.1.0`.
+4. Add a title (e.g. `v0.1.0 - testing`) and paste in release notes
+   describing what's included.
+5. Check the **"Set as a pre-release"** box.
+6. Click **Publish release**.
 
 ---
 
