@@ -1,4 +1,4 @@
-# gistcv [![DOI](https://zenodo.org/badge/1320727809.svg)](https://doi.org/10.5281/zenodo.21763847)
+# gistcv
 
 **Get the gist of a resume — as search terms.**
 
@@ -65,6 +65,43 @@ LinkedIn, Indeed, Google, etc. yourself.
 - Possible extensions: save search term sets per user, add more platforms
   (Indeed-specific query syntax, ZipRecruiter), or let the user regenerate
   with a "more senior" / "more junior" / "career change" toggle.
+- Transient provider errors (HTTP 429 rate-limited, 503 overloaded) are
+  automatically retried up to 3 times with exponential backoff before
+  surfacing an error — see "Common errors" below if you still hit one.
+
+## Common errors
+
+Free-tier LLM providers move fast — model names get deprecated and
+capacity fluctuates. These are the issues you're most likely to run into,
+in roughly the order you'll hit them:
+
+**`API key not valid`**
+The key in `.env` is missing, still set to the placeholder text, or was
+copied with extra whitespace. Get a real key from the relevant provider's
+console (links in `.env.example`), paste it in with no quotes, and
+restart the server — `.env` is only read once at startup.
+
+**`This model ... is no longer available` (404)**
+The provider retired the model ID this app was pointed at. Providers
+(especially Google) deprecate and rename models faster than this repo can
+track. Fix: check the provider's current model list and set the new ID as
+an env var, e.g. `GEMINI_MODEL=gemini-3.6-flash` in `.env` — no code
+change needed. Current model docs:
+- Gemini: https://ai.google.dev/gemini-api/docs/models
+- Groq: https://console.groq.com/docs/models
+- Anthropic: https://docs.claude.com/en/docs/about-claude/models
+
+**`currently experiencing high demand` / `UNAVAILABLE` (503)**
+This is the provider's servers being temporarily overloaded, not a
+problem with your setup. The app automatically retries 3 times with
+backoff before giving up — if you still see this error, the provider is
+having a rough moment; wait a bit and try again, or temporarily switch
+`LLM_PROVIDER` to another configured provider in `.env`.
+
+**Rate limited (429)**
+You've hit the free tier's request cap (e.g. Gemini's ~1,500/day). Also
+auto-retried a few times; if it persists, wait for the quota to reset or
+switch providers.
 
 ## Contributing
 
@@ -74,3 +111,28 @@ Issues and PRs welcome. Keep new LLM providers behind the same
 ## License
 
 MIT — see [LICENSE](./LICENSE).
+
+## Pushing to GitHub and cutting a release
+
+```bash
+git init
+git add .
+git commit -m "Initial commit: gistcv"
+git branch -M main
+git remote add origin https://github.com/<your-username>/gistcv.git
+git push -u origin main
+```
+
+Then tag and publish a release:
+
+```bash
+git tag -a v1.0.0 -m "v1.0.0"
+git push origin v1.0.0
+```
+
+On GitHub: **Releases → Draft a new release → choose tag `v1.0.0`** →
+add release notes → **Publish release**.
+
+Before pushing, replace the `<your-username>` placeholders in
+`package.json` (`repository`, `homepage`, `bugs`) and `LICENSE`
+(`<your-name>`) with your actual details.

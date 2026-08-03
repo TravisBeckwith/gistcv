@@ -19,11 +19,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TravisBeckwith/gistcv.git"
+    "url": "git+https://github.com/<your-username>/gistcv.git"
   },
-  "homepage": "https://github.com/TravisBeckwith/gistcv#readme",
+  "homepage": "https://github.com/<your-username>/gistcv#readme",
   "bugs": {
-    "url": "https://github.com/TravisBeckwith/gistcv/issues"
+    "url": "https://github.com/<your-username>/gistcv/issues"
   },
   "engines": {
     "node": ">=18"
