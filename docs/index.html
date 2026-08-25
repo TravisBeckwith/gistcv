@@ -535,16 +535,25 @@ Think about:
 - The fact that companies use wildly different job titles for the same role - include title variants, not just what's literally on the resume
 - Adjacent or pivot roles that are a realistic stretch given their background
 
+GROUNDING RULES (these matter more than being interesting):
+- Every claim in "summary" and "notes" must be directly traceable to something stated in the resume text. Do not invent, infer, or embellish achievements, awards, media coverage, patents, or credentials that are not explicitly present. If you're tempted to add color that isn't in the text, leave it out.
+- If a detail would strengthen the read but isn't in the resume (e.g. unclear scope of a role, an ambiguous title, a gap in dates), say so as a caveat in "notes" rather than assuming the flattering interpretation.
+
+SENIORITY CALIBRATION (for both primary_titles and adjacent_titles):
+- Only suggest management or executive-track titles (Director, Head of, VP, Chief, "Manages a team of...") if the resume shows explicit evidence of people management, budget/P&L authority, or formal org leadership. Individual-contributor experience, even senior and long-tenured, does not by itself support a Director+ title - suggest a senior/staff/principal individual-contributor equivalent instead.
+- Only suggest junior/entry-level titles (Associate, Assistant, "Junior...", "Entry-level...") if the resume shows early-career signals (roughly 0-3 years, or explicit trainee/training framing). Don't undersell someone with a long track record.
+- "adjacent_titles" should be a realistic stretch (a pivot the candidate could credibly make and defend in an interview), not an aspirational leap several levels up or into a domain with no supporting evidence at all. If a title in this list requires a meaningful skill gap, note that gap in "notes" rather than silently omitting it.
+
 Return ONLY valid JSON (no markdown fences, no preamble) matching this exact shape:
 
 {
-  "summary": "one or two sentence read on their profile/level",
+  "summary": "one or two sentence read on their profile/level, grounded only in what the resume states",
   "primary_titles": ["string", "..."],
   "adjacent_titles": ["string", "..."],
   "skill_keywords": ["string", "..."],
   "linkedin_boolean_searches": ["string", "..."],
   "google_xray_searches": ["string", "..."],
-  "notes": "any caveats or suggestions, e.g. if the resume is thin on certain signals"
+  "notes": "caveats or suggestions - e.g. if the resume is thin on certain signals, if a seniority/title call was ambiguous, or if an adjacent title implies a skill gap worth naming"
 }
 
 Resume text:
