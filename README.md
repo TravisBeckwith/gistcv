@@ -19,7 +19,7 @@ LinkedIn, Indeed, Google, etc. yourself.
 
 **Option 1 — No install, just a webpage.** Open `web/index.html` in any
 browser (locally, or via GitHub Pages if enabled on this repo — see
-[web/README](./web/README.md)), paste in your own free Gemini API key,
+[docs/README](./docs/README.md)), paste in your own free Gemini API key,
 and go. No Node, no npm, no terminal. Best for anyone who isn't a
 developer.
 
